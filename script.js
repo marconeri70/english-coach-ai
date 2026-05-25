@@ -1,101 +1,89 @@
-const WORKER_URL = "https://english-ai-worker.vocidicassino.workers.dev/";
+const WORKER_URL =
+"https://english-ai-worker.vocidicassino.workers.dev/";
 
 let conversationHistory = [];
 let recognition;
-let isListening = false;
-let messageCounter = 0;
+let continuousMode = false;
+
+let xp =
+Number(localStorage.getItem("xp")) || 0;
+
+updateXP();
 
 function showPage(pageId){
-  document.querySelectorAll(".page").forEach(page=>{
-    page.classList.remove("active");
-  });
 
-  document.getElementById(pageId).classList.add("active");
+  document.querySelectorAll(".page")
+    .forEach(page=>{
+      page.classList.remove("active");
+    });
+
+  document.getElementById(pageId)
+    .classList.add("active");
 }
 
-function getCurrentLevel(){
-  return document.getElementById("levelSelect").value;
+function addXP(value){
+
+  xp += value;
+
+  localStorage.setItem("xp", xp);
+
+  updateXP();
+}
+
+function updateXP(){
+
+  document.getElementById("xpValue")
+    .innerText = xp;
+
+  let level = "Beginner";
+
+  if(xp >= 100){
+    level = "Intermediate";
+  }
+
+  if(xp >= 300){
+    level = "Advanced";
+  }
+
+  document.getElementById("levelValue")
+    .innerText = level;
 }
 
 function cleanForSpeech(text){
+
   return text
     .replace(/<[^>]*>/g, " ")
     .replace(/\*/g, "")
-    .replace(/_/g, "")
-    .replace(/#/g, "")
-    .replace(/`/g, "")
-    .replace(/["“”]/g, "")
-    .replace(/[()[\]{}]/g, " ")
-    .replace(/[.,;:!?]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function speakText(text){
-  const cleanText = cleanForSpeech(text);
 
-  speechSynthesis.cancel();
+  const avatar =
+    document.getElementById("avatar");
 
-  const speech = new SpeechSynthesisUtterance(cleanText);
+  avatar.classList.add("talking");
+
+  const speech =
+    new SpeechSynthesisUtterance(
+      cleanForSpeech(text)
+    );
 
   speech.lang = "it-IT";
+
   speech.rate = 0.95;
-  speech.pitch = 1;
-  speech.volume = 1;
 
-  speechSynthesis.speak(speech);
-}
-
-function speakEnglish(text){
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US";
-  speech.rate = 0.85;
-  speech.pitch = 1;
+  speech.onend = ()=>{
+    avatar.classList.remove("talking");
+  };
 
   speechSynthesis.cancel();
+
   speechSynthesis.speak(speech);
 }
 
-function startVoiceInput(){
-  if(!("webkitSpeechRecognition" in window)){
-    alert("Usa Chrome.");
-    return;
-  }
-
-  if(!recognition){
-    recognition = new webkitSpeechRecognition();
-
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = function(event){
-      const transcript = event.results[0][0].transcript;
-
-      document.getElementById("userInput").value = transcript;
-
-      sendMessage();
-    };
-
-    recognition.onend = function(){
-      isListening = false;
-
-      document.getElementById("micBtn").innerText =
-        "🎤 Parla";
-    };
-  }
-
-  if(!isListening){
-    isListening = true;
-
-    document.getElementById("micBtn").innerText =
-      "🛑 Ascolto...";
-
-    recognition.start();
-  }
-}
-
-async function sendMessage(){
+async function sendMessage(textFromVoice = null){
 
   const input =
     document.getElementById("userInput");
@@ -103,14 +91,10 @@ async function sendMessage(){
   const chatBox =
     document.getElementById("chatBox");
 
-  const text = input.value.trim();
+  const text =
+    textFromVoice || input.value.trim();
 
   if(!text) return;
-
-  messageCounter++;
-
-  const loadingId =
-    "loading_" + messageCounter;
 
   chatBox.innerHTML += `
     <div class="message user">
@@ -122,7 +106,7 @@ async function sendMessage(){
 
   chatBox.innerHTML += `
     <div class="message ai typing"
-         id="${loadingId}">
+         id="loading">
       🤖 AI is thinking...
     </div>
   `;
@@ -135,41 +119,50 @@ async function sendMessage(){
     const response =
       await fetch(WORKER_URL, {
 
-      method: "POST",
+      method:"POST",
 
-      headers: {
+      headers:{
         "Content-Type":
           "application/json"
       },
 
-      body: JSON.stringify({
-        message: text,
-        history: conversationHistory,
-        level: getCurrentLevel()
+      body:JSON.stringify({
+
+        message:text,
+
+        history:
+          conversationHistory,
+
+        level:
+          document.getElementById(
+            "levelSelect"
+          ).value
       })
     });
 
-    const data = await response.json();
-
-    const loadingMessage =
-      document.getElementById(loadingId);
+    const data =
+      await response.json();
 
     const reply =
       data.reply ||
-      "Errore nella risposta AI.";
+      "Errore AI.";
 
-    loadingMessage.classList.remove("typing");
-
-    loadingMessage.innerHTML = reply;
+    document.getElementById(
+      "loading"
+    ).outerHTML = `
+      <div class="message ai">
+        ${reply}
+      </div>
+    `;
 
     conversationHistory.push({
-      role: "user",
-      content: text
+      role:"user",
+      content:text
     });
 
     conversationHistory.push({
-      role: "assistant",
-      content: reply
+      role:"assistant",
+      content:reply
     });
 
     if(conversationHistory.length > 12){
@@ -179,23 +172,146 @@ async function sendMessage(){
 
     speakText(reply);
 
+    addXP(10);
+
   }catch(error){
 
-    const loadingMessage =
-      document.getElementById(loadingId);
-
-    loadingMessage.innerHTML =
-      "Errore collegamento AI.";
+    document.getElementById(
+      "loading"
+    ).outerHTML = `
+      <div class="message ai">
+        Errore collegamento AI.
+      </div>
+    `;
   }
 
   chatBox.scrollTop =
     chatBox.scrollHeight;
 }
 
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{
-    navigator.serviceWorker.register(
-      "service-worker.js"
+async function generateQuiz(){
+
+  const quizContainer =
+    document.getElementById(
+      "quizContainer"
     );
-  });
+
+  quizContainer.innerHTML =
+    "🤖 Generazione quiz...";
+
+  try{
+
+    const response =
+      await fetch(WORKER_URL, {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":
+          "application/json"
+      },
+
+      body:JSON.stringify({
+
+        message:
+`Crea un mini quiz inglese
+molto semplice con:
+- domanda
+- 3 risposte
+- soluzione finale
+
+in HTML semplice.`,
+
+        history:[]
+      })
+    });
+
+    const data =
+      await response.json();
+
+    quizContainer.innerHTML =
+      data.reply;
+
+  }catch(error){
+
+    quizContainer.innerHTML =
+      "Errore quiz.";
+  }
+}
+
+function toggleContinuousConversation(){
+
+  if(!("webkitSpeechRecognition" in window)){
+    alert("Usa Chrome");
+    return;
+  }
+
+  if(!recognition){
+
+    recognition =
+      new webkitSpeechRecognition();
+
+    recognition.lang = "en-US";
+
+    recognition.continuous = true;
+
+    recognition.interimResults = false;
+
+    recognition.onresult =
+      function(event){
+
+      const transcript =
+        event.results[
+          event.results.length -1
+        ][0].transcript;
+
+      sendMessage(transcript);
+    };
+
+    recognition.onend =
+      function(){
+
+      if(continuousMode){
+        recognition.start();
+      }
+    };
+  }
+
+  continuousMode =
+    !continuousMode;
+
+  const micBtn =
+    document.getElementById(
+      "micBtn"
+    );
+
+  if(continuousMode){
+
+    micBtn.innerText =
+      "🛑 Stop Live";
+
+    recognition.start();
+
+  }else{
+
+    micBtn.innerText =
+      "🎤 Conversazione Live";
+
+    recognition.stop();
+  }
+}
+
+if("serviceWorker" in navigator){
+
+  window.addEventListener(
+    "load",
+    ()=>{
+
+      navigator
+        .serviceWorker
+        .register(
+          "service-worker.js"
+        );
+    }
+  );
 }

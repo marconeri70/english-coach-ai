@@ -4,14 +4,16 @@ const WORKER_URL =
 let conversationHistory = [];
 let recognition;
 let continuousMode = false;
+let messageCounter = 0;
 
 let xp =
 Number(localStorage.getItem("xp")) || 0;
 
-updateXP();
+window.addEventListener("load", () => {
+  updateXP();
+});
 
 function showPage(pageId){
-
   document.querySelectorAll(".page")
     .forEach(page=>{
       page.classList.remove("active");
@@ -22,18 +24,18 @@ function showPage(pageId){
 }
 
 function addXP(value){
-
   xp += value;
-
   localStorage.setItem("xp", xp);
-
   updateXP();
 }
 
 function updateXP(){
+  const xpValue = document.getElementById("xpValue");
+  const levelValue = document.getElementById("levelValue");
 
-  document.getElementById("xpValue")
-    .innerText = xp;
+  if(!xpValue || !levelValue) return;
+
+  xpValue.innerText = xp;
 
   let level = "Beginner";
 
@@ -45,38 +47,48 @@ function updateXP(){
     level = "Advanced";
   }
 
-  document.getElementById("levelValue")
-    .innerText = level;
+  levelValue.innerText = level;
 }
 
 function cleanForSpeech(text){
-
-  return text
+  return String(text)
     .replace(/<[^>]*>/g, " ")
     .replace(/\*/g, "")
+    .replace(/_/g, "")
+    .replace(/#/g, "")
+    .replace(/`/g, "")
+    .replace(/["“”]/g, "")
+    .replace(/[()[\]{}]/g, " ")
+    .replace(/[.,;:!?]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function speakEnglish(text){
+  const avatar = document.getElementById("avatar");
+  if(avatar) avatar.classList.add("talking");
+
   const speech =
-    new SpeechSynthesisUtterance(text);
+    new SpeechSynthesisUtterance(cleanForSpeech(text));
 
   speech.lang = "en-US";
   speech.rate = 0.85;
   speech.pitch = 1;
   speech.volume = 1;
 
+  speech.onend = ()=>{
+    if(avatar) avatar.classList.remove("talking");
+  };
+
   speechSynthesis.cancel();
   speechSynthesis.speak(speech);
 }
 
 function speakText(text){
-
   const avatar =
     document.getElementById("avatar");
 
-  avatar.classList.add("talking");
+  if(avatar) avatar.classList.add("talking");
 
   const speech =
     new SpeechSynthesisUtterance(
@@ -84,30 +96,35 @@ function speakText(text){
     );
 
   speech.lang = "it-IT";
-
   speech.rate = 0.95;
+  speech.pitch = 1;
+  speech.volume = 1;
 
   speech.onend = ()=>{
-    avatar.classList.remove("talking");
+    if(avatar) avatar.classList.remove("talking");
   };
 
   speechSynthesis.cancel();
-
   speechSynthesis.speak(speech);
 }
 
 async function sendMessage(textFromVoice = null){
-
   const input =
     document.getElementById("userInput");
 
   const chatBox =
     document.getElementById("chatBox");
 
+  const levelSelect =
+    document.getElementById("levelSelect");
+
   const text =
     textFromVoice || input.value.trim();
 
   if(!text) return;
+
+  messageCounter++;
+  const loadingId = "loading_" + messageCounter;
 
   chatBox.innerHTML += `
     <div class="message user">
@@ -115,11 +132,11 @@ async function sendMessage(textFromVoice = null){
     </div>
   `;
 
-  input.value = "";
+  if(input) input.value = "";
 
   chatBox.innerHTML += `
     <div class="message ai typing"
-         id="loading">
+         id="${loadingId}">
       🤖 AI is thinking...
     </div>
   `;
@@ -128,30 +145,18 @@ async function sendMessage(textFromVoice = null){
     chatBox.scrollHeight;
 
   try{
-
     const response =
       await fetch(WORKER_URL, {
-
-      method:"POST",
-
-      headers:{
-        "Content-Type":
-          "application/json"
-      },
-
-      body:JSON.stringify({
-
-        message:text,
-
-        history:
-          conversationHistory,
-
-        level:
-          document.getElementById(
-            "levelSelect"
-          ).value
-      })
-    });
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message:text,
+          history:conversationHistory,
+          level: levelSelect ? levelSelect.value : "A1"
+        })
+      });
 
     const data =
       await response.json();
@@ -160,13 +165,16 @@ async function sendMessage(textFromVoice = null){
       data.reply ||
       "Errore AI.";
 
-    document.getElementById(
-      "loading"
-    ).outerHTML = `
-      <div class="message ai">
-        ${reply}
-      </div>
-    `;
+    const loadingElement =
+      document.getElementById(loadingId);
+
+    if(loadingElement){
+      loadingElement.outerHTML = `
+        <div class="message ai">
+          ${reply}
+        </div>
+      `;
+    }
 
     conversationHistory.push({
       role:"user",
@@ -188,14 +196,16 @@ async function sendMessage(textFromVoice = null){
     addXP(10);
 
   }catch(error){
+    const loadingElement =
+      document.getElementById(loadingId);
 
-    document.getElementById(
-      "loading"
-    ).outerHTML = `
-      <div class="message ai">
-        Errore collegamento AI.
-      </div>
-    `;
+    if(loadingElement){
+      loadingElement.outerHTML = `
+        <div class="message ai">
+          Errore collegamento AI.
+        </div>
+      `;
+    }
   }
 
   chatBox.scrollTop =
@@ -203,15 +213,16 @@ async function sendMessage(textFromVoice = null){
 }
 
 async function generateQuiz(){
-
   const quizContainer =
     document.getElementById("quizContainer");
+
+  const levelSelect =
+    document.getElementById("levelSelect");
 
   quizContainer.innerHTML =
     "🤖 Generazione quiz...";
 
   try{
-
     const response = await fetch(WORKER_URL, {
       method:"POST",
       headers:{
@@ -219,7 +230,7 @@ async function generateQuiz(){
       },
       body:JSON.stringify({
         message:
-`Crea UN solo quiz di inglese livello A1.
+`Crea UN solo quiz di inglese.
 Rispondi SOLO in JSON valido, senza markdown.
 
 Formato obbligatorio:
@@ -232,16 +243,22 @@ Formato obbligatorio:
 
 Non mostrare la soluzione nella domanda.`,
         history:[],
-        level: document.getElementById("levelSelect")?.value || "A1"
+        level: levelSelect ? levelSelect.value : "A1"
       })
     });
 
     const data = await response.json();
 
+    let cleanReply = String(data.reply || "")
+      .replace(/```json/g, "")
+      .replace(/```html/g, "")
+      .replace(/```/g, "")
+      .trim();
+
     let quiz;
 
     try{
-      quiz = JSON.parse(data.reply);
+      quiz = JSON.parse(cleanReply);
     }catch(e){
       quizContainer.innerHTML =
         "Errore nel formato del quiz. Premi di nuovo Genera Quiz.";
@@ -253,12 +270,8 @@ Non mostrare la soluzione nella domanda.`,
       <p>${quiz.question}</p>
 
       <div class="quiz-options">
-        ${quiz.answers.map(answer => `
-          <button onclick="checkQuizAnswer(
-            '${answer.replace(/'/g, "\\'")}',
-            '${quiz.correct.replace(/'/g, "\\'")}',
-            '${quiz.explanation.replace(/'/g, "\\'")}'
-          )">
+        ${quiz.answers.map((answer, index) => `
+          <button onclick="checkQuizAnswer(${index})">
             ${answer}
           </button>
         `).join("")}
@@ -267,34 +280,38 @@ Non mostrare la soluzione nella domanda.`,
       <div id="quizResult"></div>
     `;
 
-  }catch(error){
+    window.currentQuiz = quiz;
 
+  }catch(error){
     quizContainer.innerHTML =
       "Errore quiz.";
   }
 }
 
-function checkQuizAnswer(answer, correct, explanation){
-
+function checkQuizAnswer(index){
+  const quiz = window.currentQuiz;
   const result =
     document.getElementById("quizResult");
 
-  if(answer === correct){
+  if(!quiz || !result) return;
 
+  const answer = quiz.answers[index];
+  const correct = quiz.correct;
+  const explanation = quiz.explanation;
+
+  if(answer === correct){
     result.innerHTML = `
       <div class="quiz-correct">
         ✅ Risposta corretta!<br><br>
-        🔊 Ascolta la pronuncia corretta:
+        🔊 Pronuncia corretta:
         <strong>${correct}</strong>
       </div>
     `;
 
     addXP(20);
-
     speakEnglish(correct);
 
   }else{
-
     result.innerHTML = `
       <div class="quiz-wrong">
         ❌ Risposta errata.<br><br>
@@ -308,71 +325,61 @@ function checkQuizAnswer(answer, correct, explanation){
     speakText(
       "Risposta errata. " +
       explanation +
-      ". La risposta corretta è: "
+      ". Ora ascolta la risposta corretta."
     );
 
     setTimeout(()=>{
       speakEnglish(correct);
-    }, 2500);
+    }, 3000);
   }
 }
 
 function toggleContinuousConversation(){
-
   if(!("webkitSpeechRecognition" in window)){
     alert("Usa Chrome");
     return;
   }
 
   if(!recognition){
-
     recognition =
       new webkitSpeechRecognition();
 
     recognition.lang = "en-US";
-
     recognition.continuous = true;
-
     recognition.interimResults = false;
 
     recognition.onresult =
       function(event){
+        const transcript =
+          event.results[
+            event.results.length -1
+          ][0].transcript;
 
-      const transcript =
-        event.results[
-          event.results.length -1
-        ][0].transcript;
-
-      sendMessage(transcript);
-    };
+        sendMessage(transcript);
+      };
 
     recognition.onend =
       function(){
-
-      if(continuousMode){
-        recognition.start();
-      }
-    };
+        if(continuousMode){
+          recognition.start();
+        }
+      };
   }
 
   continuousMode =
     !continuousMode;
 
   const micBtn =
-    document.getElementById(
-      "micBtn"
-    );
+    document.getElementById("micBtn");
 
   if(continuousMode){
-
-    micBtn.innerText =
+    if(micBtn) micBtn.innerText =
       "🛑 Stop Live";
 
     recognition.start();
 
   }else{
-
-    micBtn.innerText =
+    if(micBtn) micBtn.innerText =
       "🎤 Conversazione Live";
 
     recognition.stop();
@@ -380,16 +387,9 @@ function toggleContinuousConversation(){
 }
 
 if("serviceWorker" in navigator){
-
-  window.addEventListener(
-    "load",
-    ()=>{
-
-      navigator
-        .serviceWorker
-        .register(
-          "service-worker.js"
-        );
-    }
-  );
+  window.addEventListener("load", ()=>{
+    navigator
+      .serviceWorker
+      .register("service-worker.js");
+  });
 }

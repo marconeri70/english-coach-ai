@@ -1,40 +1,27 @@
+const WORKER_URL = "https://english-ai-worker.vocidicassino.workers.dev/";
+
 function showPage(pageId){
+  document.querySelectorAll('.page').forEach(page=>{
+    page.classList.remove('active');
+  });
 
-  document
-    .querySelectorAll('.page')
-    .forEach(page=>{
-      page.classList.remove('active');
-    });
-
-  document
-    .getElementById(pageId)
-    .classList.add('active');
+  document.getElementById(pageId).classList.add('active');
 }
 
 function speakText(text){
-
   const speech = new SpeechSynthesisUtterance(text);
-
   speech.lang = 'en-US';
-
   speech.rate = 0.9;
-
   speech.pitch = 1;
-
   speechSynthesis.speak(speech);
 }
 
 async function sendMessage(){
-
   const input = document.getElementById('userInput');
-
   const chatBox = document.getElementById('chatBox');
-
   const text = input.value.trim();
 
   if(!text) return;
-
-  // messaggio utente
 
   chatBox.innerHTML += `
     <div class="message user">
@@ -43,72 +30,47 @@ async function sendMessage(){
   `;
 
   input.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  chatBox.innerHTML += `
+    <div class="message ai" id="loadingMessage">
+      Sto correggendo la frase...
+    </div>
+  `;
 
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  // simulazione AI
+  try{
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text
+      })
+    });
 
-  setTimeout(()=>{
+    const data = await response.json();
 
-    let response = '';
+    const loadingMessage = document.getElementById('loadingMessage');
 
-    if(text.toLowerCase().includes('hello')){
+    loadingMessage.innerHTML = data.reply || "Errore nella risposta AI.";
 
-      response = `
-        Great! 👏<br><br>
-        "Hello" significa "Ciao".<br><br>
-        Prova anche a scrivere:<br>
-        "How are you?"
-      `;
+  }catch(error){
+    const loadingMessage = document.getElementById('loadingMessage');
 
-    }else if(text.toLowerCase().includes('how are you')){
-
-      response = `
-        Ottimo 👍<br><br>
-        "How are you?" significa:<br>
-        "Come stai?"
-      `;
-
-    }else{
-
-      response = `
-        Very good 👏<br><br>
-        La tua frase è comprensibile.<br><br>
-        Continua ad allenarti!
-      `;
-    }
-
-    chatBox.innerHTML += `
-      <div class="message ai">
-        ${response}
-      </div>
+    loadingMessage.innerHTML = `
+      Errore di collegamento con l'AI.<br>
+      Controlla il Worker Cloudflare.
     `;
+  }
 
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-  },1000);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// installazione PWA
-
 if('serviceWorker' in navigator){
-
   window.addEventListener('load', ()=>{
-
-    navigator.serviceWorker
-      .register('service-worker.js')
-
-      .then(()=>{
-
-        console.log('Service Worker registrato');
-
-      })
-
-      .catch(error=>{
-
-        console.log(error);
-
-      });
-
+    navigator.serviceWorker.register('service-worker.js');
   });
 }

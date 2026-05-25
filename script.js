@@ -65,11 +65,25 @@ function cleanForSpeech(text){
 }
 
 function speakEnglish(text){
-  const avatar = document.getElementById("avatar");
-  if(avatar) avatar.classList.add("talking");
+
+  const avatar =
+    document.getElementById("avatar");
+
+  const wasContinuous =
+    continuousMode;
+
+  if(wasContinuous && recognition){
+    recognition.stop();
+  }
+
+  if(avatar){
+    avatar.classList.add("talking");
+  }
 
   const speech =
-    new SpeechSynthesisUtterance(cleanForSpeech(text));
+    new SpeechSynthesisUtterance(
+      cleanForSpeech(text)
+    );
 
   speech.lang = "en-US";
   speech.rate = 0.85;
@@ -77,7 +91,16 @@ function speakEnglish(text){
   speech.volume = 1;
 
   speech.onend = ()=>{
-    if(avatar) avatar.classList.remove("talking");
+
+    if(avatar){
+      avatar.classList.remove("talking");
+    }
+
+    if(wasContinuous && continuousMode && recognition){
+      setTimeout(()=>{
+        recognition.start();
+      }, 800);
+    }
   };
 
   speechSynthesis.cancel();

@@ -58,6 +58,19 @@ function cleanForSpeech(text){
     .trim();
 }
 
+function speakEnglish(text){
+  const speech =
+    new SpeechSynthesisUtterance(text);
+
+  speech.lang = "en-US";
+  speech.rate = 0.85;
+  speech.pitch = 1;
+  speech.volume = 1;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(speech);
+}
+
 function speakText(text){
 
   const avatar =

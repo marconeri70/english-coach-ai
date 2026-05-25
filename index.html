@@ -15,8 +15,21 @@
 <body>
 
 <header class="header">
+
+  <div class="avatar-container">
+
+    <div id="avatar" class="avatar">
+      🤖
+    </div>
+
+  </div>
+
   <h1>🇬🇧 English Coach AI</h1>
-  <p>Impara l'inglese con l'intelligenza artificiale</p>
+
+  <p>
+    Impara l'inglese con l'intelligenza artificiale
+  </p>
+
 </header>
 
 <nav class="navbar">
@@ -25,16 +38,16 @@
     🏠 Home
   </button>
 
-  <button onclick="showPage('lesson')">
-    📚 Lezione
-  </button>
-
   <button onclick="showPage('chat')">
     🤖 AI Chat
   </button>
 
-  <button onclick="showPage('words')">
-    🧠 Vocabolario
+  <button onclick="showPage('quiz')">
+    🎯 Quiz
+  </button>
+
+  <button onclick="showPage('stats')">
+    ⭐ XP
   </button>
 
 </nav>
@@ -47,44 +60,9 @@
     <h2>Benvenuto 👋</h2>
 
     <p>
-      Allenati ogni giorno con esercizi,
-      conversazioni AI e nuove parole inglesi.
+      Allenati ogni giorno con AI,
+      quiz ed esercizi vocali.
     </p>
-  </div>
-
-  <div class="card">
-    <h3>📈 Livello attuale</h3>
-    <p>Seleziona il tuo livello nella chat AI</p>
-  </div>
-
-</section>
-
-<section id="lesson" class="page">
-
-  <div class="card">
-
-    <h2>📚 Lezione del giorno</h2>
-
-    <div class="lesson-box">
-
-      <h3>Hello 👋</h3>
-
-      <p>
-        <strong>Inglese:</strong>
-        How are you?
-      </p>
-
-      <p>
-        <strong>Italiano:</strong>
-        Come stai?
-      </p>
-
-      <button onclick="speakEnglish('How are you')">
-        🔊 Ascolta
-      </button>
-
-    </div>
-
   </div>
 
 </section>
@@ -93,11 +71,11 @@
 
   <div class="card">
 
-    <h2>🤖 AI Chat</h2>
+    <h2>🤖 Tutor AI</h2>
 
     <div class="level-selector">
 
-      <label for="levelSelect">
+      <label>
         📚 Livello:
       </label>
 
@@ -116,15 +94,7 @@
         </option>
 
         <option value="B2">
-          B2 Upper Intermediate
-        </option>
-
-        <option value="C1">
-          C1 Advanced
-        </option>
-
-        <option value="C2">
-          C2 Fluent
+          B2 Advanced
         </option>
 
       </select>
@@ -139,32 +109,70 @@
     ></textarea>
 
     <button onclick="sendMessage()">
-      Invia
+      📩 Invia
     </button>
 
-    <button id="micBtn" onclick="startVoiceInput()">
-      🎤 Parla
+    <button id="micBtn"
+            onclick="toggleContinuousConversation()">
+      🎤 Conversazione Live
     </button>
 
   </div>
 
 </section>
 
-<section id="words" class="page">
+<section id="quiz" class="page">
 
   <div class="card">
 
-    <h2>🧠 Vocabolario</h2>
+    <h2>🎯 Quiz AI</h2>
 
-    <ul id="wordList">
+    <div id="quizContainer">
 
-      <li>Hello = Ciao</li>
+      <p>
+        Premi il pulsante per generare
+        un quiz AI.
+      </p>
 
-      <li>Book = Libro</li>
+    </div>
 
-      <li>House = Casa</li>
+    <button onclick="generateQuiz()">
+      🚀 Genera Quiz
+    </button>
 
-    </ul>
+  </div>
+
+</section>
+
+<section id="stats" class="page">
+
+  <div class="card">
+
+    <h2>⭐ Progressi</h2>
+
+    <div class="xp-box">
+
+      <h3>
+        XP Totali
+      </h3>
+
+      <div id="xpValue">
+        0
+      </div>
+
+    </div>
+
+    <div class="xp-box">
+
+      <h3>
+        Livello
+      </h3>
+
+      <div id="levelValue">
+        Beginner
+      </div>
+
+    </div>
 
   </div>
 

@@ -85,10 +85,13 @@ function speakEnglish(text){
 }
 
 function speakText(text){
+
   const avatar =
     document.getElementById("avatar");
 
-  if(avatar) avatar.classList.add("talking");
+  if(avatar){
+    avatar.classList.add("talking");
+  }
 
   const speech =
     new SpeechSynthesisUtterance(
@@ -96,15 +99,60 @@ function speakText(text){
     );
 
   speech.lang = "it-IT";
-  speech.rate = 0.95;
+
+  // voce più naturale
+
+  speech.rate = 0.92;
   speech.pitch = 1;
   speech.volume = 1;
 
+  // cerca voce migliore disponibile
+
+  const voices =
+    speechSynthesis.getVoices();
+
+  const preferredVoice =
+
+    // Google naturale
+
+    voices.find(v =>
+      v.lang.includes("it") &&
+      v.name.includes("Google")
+    )
+
+    ||
+
+    // Samsung/Xiaomi Enhanced
+
+    voices.find(v =>
+      v.lang.includes("it") &&
+      (
+        v.name.includes("Natural") ||
+        v.name.includes("Enhanced")
+      )
+    )
+
+    ||
+
+    // fallback italiano
+
+    voices.find(v =>
+      v.lang.includes("it")
+    );
+
+  if(preferredVoice){
+    speech.voice = preferredVoice;
+  }
+
   speech.onend = ()=>{
-    if(avatar) avatar.classList.remove("talking");
+
+    if(avatar){
+      avatar.classList.remove("talking");
+    }
   };
 
   speechSynthesis.cancel();
+
   speechSynthesis.speak(speech);
 }
 

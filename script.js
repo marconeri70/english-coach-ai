@@ -1,5 +1,6 @@
 const WORKER_URL = "https://english-ai-worker.vocidicassino.workers.dev/";
 
+let conversationHistory = [];
 let recognition;
 let isListening = false;
 

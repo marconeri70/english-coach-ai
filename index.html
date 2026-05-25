@@ -41,107 +41,134 @@
 
 <main>
 
-  <!-- HOME -->
+<section id="home" class="page active">
 
-  <section id="home" class="page active">
+  <div class="card">
+    <h2>Benvenuto 👋</h2>
 
-    <div class="card">
-      <h2>Benvenuto 👋</h2>
+    <p>
+      Allenati ogni giorno con esercizi,
+      conversazioni AI e nuove parole inglesi.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>📈 Livello attuale</h3>
+    <p>Seleziona il tuo livello nella chat AI</p>
+  </div>
+
+</section>
+
+<section id="lesson" class="page">
+
+  <div class="card">
+
+    <h2>📚 Lezione del giorno</h2>
+
+    <div class="lesson-box">
+
+      <h3>Hello 👋</h3>
 
       <p>
-        Allenati ogni giorno con esercizi,
-        conversazioni AI e nuove parole inglesi.
+        <strong>Inglese:</strong>
+        How are you?
       </p>
-    </div>
 
-    <div class="card">
-      <h3>📈 Livello attuale</h3>
+      <p>
+        <strong>Italiano:</strong>
+        Come stai?
+      </p>
 
-      <p>A1 Beginner</p>
-    </div>
-
-  </section>
-
-  <!-- LESSON -->
-
-  <section id="lesson" class="page">
-
-    <div class="card">
-
-      <h2>📚 Lezione del giorno</h2>
-
-      <div class="lesson-box">
-
-        <h3>Hello 👋</h3>
-
-        <p>
-          <strong>Inglese:</strong>
-          How are you?
-        </p>
-
-        <p>
-          <strong>Italiano:</strong>
-          Come stai?
-        </p>
-
-        <button onclick="speakText('How are you')">
-          🔊 Ascolta
-        </button>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- CHAT -->
-
-  <section id="chat" class="page">
-
-    <div class="card">
-
-      <h2>🤖 Chat AI</h2>
-
-      <div id="chatBox"></div>
-
-      <textarea
-        id="userInput"
-        placeholder="Scrivi in inglese..."
-      ></textarea>
-
-      <button onclick="sendMessage()">
-        Invia
-      </button>
-
-      <button id="micBtn" onclick="startVoiceInput()">
-        🎤 Parla
+      <button onclick="speakEnglish('How are you')">
+        🔊 Ascolta
       </button>
 
     </div>
 
-  </section>
+  </div>
 
-  <!-- WORDS -->
+</section>
 
-  <section id="words" class="page">
+<section id="chat" class="page">
 
-    <div class="card">
+  <div class="card">
 
-      <h2>🧠 Vocabolario</h2>
+    <h2>🤖 AI Chat</h2>
 
-      <ul id="wordList">
+    <div class="level-selector">
 
-        <li>Hello = Ciao</li>
+      <label for="levelSelect">
+        📚 Livello:
+      </label>
 
-        <li>Book = Libro</li>
+      <select id="levelSelect">
 
-        <li>House = Casa</li>
+        <option value="A1">
+          A1 Beginner
+        </option>
 
-      </ul>
+        <option value="A2">
+          A2 Elementary
+        </option>
+
+        <option value="B1">
+          B1 Intermediate
+        </option>
+
+        <option value="B2">
+          B2 Upper Intermediate
+        </option>
+
+        <option value="C1">
+          C1 Advanced
+        </option>
+
+        <option value="C2">
+          C2 Fluent
+        </option>
+
+      </select>
 
     </div>
 
-  </section>
+    <div id="chatBox"></div>
+
+    <textarea
+      id="userInput"
+      placeholder="Scrivi in inglese..."
+    ></textarea>
+
+    <button onclick="sendMessage()">
+      Invia
+    </button>
+
+    <button id="micBtn" onclick="startVoiceInput()">
+      🎤 Parla
+    </button>
+
+  </div>
+
+</section>
+
+<section id="words" class="page">
+
+  <div class="card">
+
+    <h2>🧠 Vocabolario</h2>
+
+    <ul id="wordList">
+
+      <li>Hello = Ciao</li>
+
+      <li>Book = Libro</li>
+
+      <li>House = Casa</li>
+
+    </ul>
+
+  </div>
+
+</section>
 
 </main>
 

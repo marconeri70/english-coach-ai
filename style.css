@@ -142,3 +142,14 @@ textarea{
 #wordList li{
   margin-bottom:10px;
 }
+
+.typing{
+  opacity:0.7;
+  animation:blink 1s infinite;
+}
+
+@keyframes blink{
+  0%{opacity:0.4;}
+  50%{opacity:1;}
+  100%{opacity:0.4;}
+}

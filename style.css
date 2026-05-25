@@ -150,3 +150,25 @@ textarea{
   font-size:30px;
   margin-top:10px;
 }
+
+.quiz-options button{
+  display:block;
+  width:100%;
+  margin:8px 0;
+  text-align:left;
+  background:#2563eb;
+}
+
+.quiz-correct{
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background:#16a34a;
+}
+
+.quiz-wrong{
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background:#dc2626;
+}

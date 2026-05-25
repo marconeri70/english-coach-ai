@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>English Coach AI</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <meta name="theme-color" content="#0f172a">
+</head>
+
+<body>
+
+<header class="header">
+  <h1>🇬🇧 English Coach AI</h1>
+  <p>Impara l'inglese con l'intelligenza artificiale</p>
+</header>
+
+<nav class="navbar">
+
+  <button onclick="showPage('home')">
+    🏠 Home
+  </button>
+
+  <button onclick="showPage('lesson')">
+    📚 Lezione
+  </button>
+
+  <button onclick="showPage('chat')">
+    🤖 AI Chat
+  </button>
+
+  <button onclick="showPage('words')">
+    🧠 Vocabolario
+  </button>
+
+</nav>
+
+<main>
+
+  <!-- HOME -->
+
+  <section id="home" class="page active">
+
+    <div class="card">
+      <h2>Benvenuto 👋</h2>
+
+      <p>
+        Allenati ogni giorno con esercizi,
+        conversazioni AI e nuove parole inglesi.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>📈 Livello attuale</h3>
+
+      <p>A1 Beginner</p>
+    </div>
+
+  </section>
+
+  <!-- LESSON -->
+
+  <section id="lesson" class="page">
+
+    <div class="card">
+
+      <h2>📚 Lezione del giorno</h2>
+
+      <div class="lesson-box">
+
+        <h3>Hello 👋</h3>
+
+        <p>
+          <strong>Inglese:</strong>
+          How are you?
+        </p>
+
+        <p>
+          <strong>Italiano:</strong>
+          Come stai?
+        </p>
+
+        <button onclick="speakText('How are you')">
+          🔊 Ascolta
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- CHAT -->
+
+  <section id="chat" class="page">
+
+    <div class="card">
+
+      <h2>🤖 Chat AI</h2>
+
+      <div id="chatBox"></div>
+
+      <textarea
+        id="userInput"
+        placeholder="Scrivi in inglese..."
+      ></textarea>
+
+      <button onclick="sendMessage()">
+        Invia
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- WORDS -->
+
+  <section id="words" class="page">
+
+    <div class="card">
+
+      <h2>🧠 Vocabolario</h2>
+
+      <ul id="wordList">
+
+        <li>Hello = Ciao</li>
+
+        <li>Book = Libro</li>
+
+        <li>House = Casa</li>
+
+      </ul>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>

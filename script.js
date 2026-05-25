@@ -12,11 +12,24 @@ function showPage(pageId){
 }
 
 function speakText(text){
-  const cleanText = text.replace(/<[^>]*>/g, "");
+  let cleanText = text
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\*/g, "")
+    .replace(/_/g, "")
+    .replace(/#/g, "")
+    .replace(/`/g, "")
+    .replace(/["“”]/g, "")
+    .replace(/[()[\]{}]/g, " ")
+    .replace(/[.,;:!?]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
   const speech = new SpeechSynthesisUtterance(cleanText);
   speech.lang = "it-IT";
-  speech.rate = 0.9;
+  speech.rate = 0.85;
   speech.pitch = 1;
+
+  speechSynthesis.cancel();
   speechSynthesis.speak(speech);
 }
 

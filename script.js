@@ -157,6 +157,11 @@ body: JSON.stringify({
     const loadingMessage = document.getElementById("loadingMessage");
     const reply = data.reply || "Errore nella risposta AI.";
 
+  conversationHistory.push({
+  role: "assistant",
+  content: reply
+});
+
     loadingMessage.innerHTML = reply;
 
     speakText(reply);

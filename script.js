@@ -3,6 +3,7 @@ const WORKER_URL = "https://english-ai-worker.vocidicassino.workers.dev/";
 let conversationHistory = [];
 let recognition;
 let isListening = false;
+let messageCounter = 0;
 
 function showPage(pageId){
   document.querySelectorAll(".page").forEach(page=>{
@@ -12,8 +13,8 @@ function showPage(pageId){
   document.getElementById(pageId).classList.add("active");
 }
 
-function speakText(text){
-  let cleanText = text
+function cleanForSpeech(text){
+  return text
     .replace(/<[^>]*>/g, " ")
     .replace(/\*/g, "")
     .replace(/_/g, "")
@@ -24,6 +25,10 @@ function speakText(text){
     .replace(/[.,;:!?]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function speakText(text){
+  const cleanText = cleanForSpeech(text);
 
   speechSynthesis.cancel();
 
@@ -49,16 +54,6 @@ function speakText(text){
     speech.voice = preferredVoice;
   }
 
-  speechSynthesis.speak(speech);
-}
-
-function speakEnglish(text){
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US";
-  speech.rate = 0.85;
-  speech.pitch = 1;
-
-  speechSynthesis.cancel();
   speechSynthesis.speak(speech);
 }
 
@@ -106,6 +101,9 @@ async function sendMessage(){
 
   if(!text) return;
 
+  messageCounter++;
+  const loadingId = "loadingMessage_" + messageCounter;
+
   chatBox.innerHTML += `
     <div class="message user">
       ${text}
@@ -113,20 +111,14 @@ async function sendMessage(){
   `;
 
   input.value = "";
-  chatBox.scrollTop = chatBox.scrollHeight;
 
   chatBox.innerHTML += `
-    <div class="message ai" id="loadingMessage">
-      Sto correggendo la frase...
+    <div class="message ai" id="${loadingId}">
+      Sto pensando...
     </div>
   `;
 
   chatBox.scrollTop = chatBox.scrollHeight;
-
-  conversationHistory.push({
-    role: "user",
-    content: text
-  });
 
   try{
     const response = await fetch(WORKER_URL, {
@@ -142,20 +134,29 @@ async function sendMessage(){
 
     const data = await response.json();
 
-    const loadingMessage = document.getElementById("loadingMessage");
+    const loadingMessage = document.getElementById(loadingId);
     const reply = data.reply || "Errore nella risposta AI.";
+
+    loadingMessage.innerHTML = reply;
+
+    conversationHistory.push({
+      role: "user",
+      content: text
+    });
 
     conversationHistory.push({
       role: "assistant",
       content: reply
     });
 
-    loadingMessage.innerHTML = reply;
+    if(conversationHistory.length > 12){
+      conversationHistory = conversationHistory.slice(-12);
+    }
 
     speakText(reply);
 
   }catch(error){
-    const loadingMessage = document.getElementById("loadingMessage");
+    const loadingMessage = document.getElementById(loadingId);
 
     loadingMessage.innerHTML = `
       Errore di collegamento con l'AI.<br>

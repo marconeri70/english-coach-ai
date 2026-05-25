@@ -137,6 +137,7 @@ async function sendMessage(){
     const loadingMessage = document.getElementById(loadingId);
     const reply = data.reply || "Errore nella risposta AI.";
 
+    loadingMessage.classList.remove("typing");
     loadingMessage.innerHTML = reply;
 
     conversationHistory.push({

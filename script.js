@@ -141,9 +141,15 @@ async function sendMessage(){
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        message: text
-      })
+      conversationHistory.push({
+  role: "user",
+  content: text
+});
+
+body: JSON.stringify({
+  message: text,
+  history: conversationHistory
+})
     });
 
     const data = await response.json();

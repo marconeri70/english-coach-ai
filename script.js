@@ -12,6 +12,7 @@ function showPage(pageId){
 }
 
 function speakText(text){
+
   let cleanText = text
     .replace(/<[^>]*>/g, " ")
     .replace(/\*/g, "")
@@ -24,12 +25,44 @@ function speakText(text){
     .replace(/\s+/g, " ")
     .trim();
 
+  speechSynthesis.cancel();
+
   const speech = new SpeechSynthesisUtterance(cleanText);
+
+  // lingua
+
   speech.lang = "it-IT";
-  speech.rate = 0.85;
+
+  // velocità più naturale
+
+  speech.rate = 0.95;
+
+  // tono naturale
+
   speech.pitch = 1;
 
-  speechSynthesis.cancel();
+  // volume
+
+  speech.volume = 1;
+
+  // cerca voce migliore
+
+  const voices = speechSynthesis.getVoices();
+
+  const preferredVoice =
+    voices.find(v =>
+      v.lang.includes("it") &&
+      (
+        v.name.includes("Google") ||
+        v.name.includes("Natural") ||
+        v.name.includes("Enhanced")
+      )
+    ) || voices.find(v => v.lang.includes("it"));
+
+  if(preferredVoice){
+    speech.voice = preferredVoice;
+  }
+
   speechSynthesis.speak(speech);
 }
 
@@ -138,3 +171,7 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("service-worker.js");
   });
 }
+
+window.speechSynthesis.onvoiceschanged = () => {
+  speechSynthesis.getVoices();
+};

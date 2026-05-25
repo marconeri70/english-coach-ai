@@ -89,6 +89,13 @@ function speakText(text){
   const avatar =
     document.getElementById("avatar");
 
+  const wasContinuous =
+    continuousMode;
+
+  if(wasContinuous && recognition){
+    recognition.stop();
+  }
+
   if(avatar){
     avatar.classList.add("talking");
   }
@@ -99,31 +106,19 @@ function speakText(text){
     );
 
   speech.lang = "it-IT";
-
-  // voce più naturale
-
   speech.rate = 0.92;
   speech.pitch = 1;
   speech.volume = 1;
-
-  // cerca voce migliore disponibile
 
   const voices =
     speechSynthesis.getVoices();
 
   const preferredVoice =
-
-    // Google naturale
-
     voices.find(v =>
       v.lang.includes("it") &&
       v.name.includes("Google")
     )
-
     ||
-
-    // Samsung/Xiaomi Enhanced
-
     voices.find(v =>
       v.lang.includes("it") &&
       (
@@ -131,11 +126,7 @@ function speakText(text){
         v.name.includes("Enhanced")
       )
     )
-
     ||
-
-    // fallback italiano
-
     voices.find(v =>
       v.lang.includes("it")
     );
@@ -149,10 +140,15 @@ function speakText(text){
     if(avatar){
       avatar.classList.remove("talking");
     }
+
+    if(wasContinuous && continuousMode && recognition){
+      setTimeout(()=>{
+        recognition.start();
+      }, 800);
+    }
   };
 
   speechSynthesis.cancel();
-
   speechSynthesis.speak(speech);
 }
 

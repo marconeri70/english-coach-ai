@@ -5,15 +5,14 @@ let recognition;
 let isListening = false;
 
 function showPage(pageId){
-  document.querySelectorAll('.page').forEach(page=>{
-    page.classList.remove('active');
+  document.querySelectorAll(".page").forEach(page=>{
+    page.classList.remove("active");
   });
 
-  document.getElementById(pageId).classList.add('active');
+  document.getElementById(pageId).classList.add("active");
 }
 
 function speakText(text){
-
   let cleanText = text
     .replace(/<[^>]*>/g, " ")
     .replace(/\*/g, "")
@@ -29,24 +28,10 @@ function speakText(text){
   speechSynthesis.cancel();
 
   const speech = new SpeechSynthesisUtterance(cleanText);
-
-  // lingua
-
   speech.lang = "it-IT";
-
-  // velocità più naturale
-
   speech.rate = 0.95;
-
-  // tono naturale
-
   speech.pitch = 1;
-
-  // volume
-
   speech.volume = 1;
-
-  // cerca voce migliore
 
   const voices = speechSynthesis.getVoices();
 
@@ -72,6 +57,8 @@ function speakEnglish(text){
   speech.lang = "en-US";
   speech.rate = 0.85;
   speech.pitch = 1;
+
+  speechSynthesis.cancel();
   speechSynthesis.speak(speech);
 }
 
@@ -106,7 +93,8 @@ function startVoiceInput(){
 
   if(!isListening){
     isListening = true;
-    document.getElementById("micBtn").innerText = "🛑 Ascolto...";
+    const micBtn = document.getElementById("micBtn");
+    if(micBtn) micBtn.innerText = "🛑 Ascolto...";
     recognition.start();
   }
 }
@@ -135,21 +123,21 @@ async function sendMessage(){
 
   chatBox.scrollTop = chatBox.scrollHeight;
 
+  conversationHistory.push({
+    role: "user",
+    content: text
+  });
+
   try{
     const response = await fetch(WORKER_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      conversationHistory.push({
-  role: "user",
-  content: text
-});
-
-body: JSON.stringify({
-  message: text,
-  history: conversationHistory
-})
+      body: JSON.stringify({
+        message: text,
+        history: conversationHistory
+      })
     });
 
     const data = await response.json();
@@ -157,10 +145,10 @@ body: JSON.stringify({
     const loadingMessage = document.getElementById("loadingMessage");
     const reply = data.reply || "Errore nella risposta AI.";
 
-  conversationHistory.push({
-  role: "assistant",
-  content: reply
-});
+    conversationHistory.push({
+      role: "assistant",
+      content: reply
+    });
 
     loadingMessage.innerHTML = reply;
 

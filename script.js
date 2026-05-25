@@ -113,7 +113,7 @@ async function sendMessage(){
   input.value = "";
 
   chatBox.innerHTML += `
-    <div class="message ai" id="${loadingId}">
+    <div class="message ai typing" id="${loadingId}">
       🤖 AI is thinking...
     </div>
   `;

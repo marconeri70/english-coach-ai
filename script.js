@@ -270,21 +270,37 @@ function checkQuizAnswer(answer, correct, explanation){
 
     result.innerHTML = `
       <div class="quiz-correct">
-        ✅ Risposta corretta!
+        ✅ Risposta corretta!<br><br>
+        🔊 Ascolta la pronuncia corretta:
+        <strong>${correct}</strong>
       </div>
     `;
 
     addXP(20);
+
+    speakEnglish(correct);
 
   }else{
 
     result.innerHTML = `
       <div class="quiz-wrong">
         ❌ Risposta errata.<br><br>
-        <strong>Risposta corretta:</strong> ${correct}<br>
-        <strong>Spiegazione:</strong> ${explanation}
+        <strong>Risposta corretta:</strong> ${correct}<br><br>
+        <strong>Spiegazione:</strong> ${explanation}<br><br>
+        🔊 Ora ascolta la pronuncia corretta:
+        <strong>${correct}</strong>
       </div>
     `;
+
+    speakText(
+      "Risposta errata. " +
+      explanation +
+      ". La risposta corretta è: "
+    );
+
+    setTimeout(()=>{
+      speakEnglish(correct);
+    }, 2500);
   }
 }
 

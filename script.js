@@ -192,50 +192,99 @@ async function sendMessage(textFromVoice = null){
 async function generateQuiz(){
 
   const quizContainer =
-    document.getElementById(
-      "quizContainer"
-    );
+    document.getElementById("quizContainer");
 
   quizContainer.innerHTML =
     "🤖 Generazione quiz...";
 
   try{
 
-    const response =
-      await fetch(WORKER_URL, {
-
+    const response = await fetch(WORKER_URL, {
       method:"POST",
-
       headers:{
-        "Content-Type":
-          "application/json"
+        "Content-Type":"application/json"
       },
-
       body:JSON.stringify({
-
         message:
-`Crea un mini quiz inglese
-molto semplice con:
-- domanda
-- 3 risposte
-- soluzione finale
+`Crea UN solo quiz di inglese livello A1.
+Rispondi SOLO in JSON valido, senza markdown.
 
-in HTML semplice.`,
+Formato obbligatorio:
+{
+  "question": "domanda",
+  "answers": ["risposta 1", "risposta 2", "risposta 3"],
+  "correct": "risposta corretta",
+  "explanation": "spiegazione breve in italiano"
+}
 
-        history:[]
+Non mostrare la soluzione nella domanda.`,
+        history:[],
+        level: document.getElementById("levelSelect")?.value || "A1"
       })
     });
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
-    quizContainer.innerHTML =
-      data.reply;
+    let quiz;
+
+    try{
+      quiz = JSON.parse(data.reply);
+    }catch(e){
+      quizContainer.innerHTML =
+        "Errore nel formato del quiz. Premi di nuovo Genera Quiz.";
+      return;
+    }
+
+    quizContainer.innerHTML = `
+      <h3>Domanda:</h3>
+      <p>${quiz.question}</p>
+
+      <div class="quiz-options">
+        ${quiz.answers.map(answer => `
+          <button onclick="checkQuizAnswer(
+            '${answer.replace(/'/g, "\\'")}',
+            '${quiz.correct.replace(/'/g, "\\'")}',
+            '${quiz.explanation.replace(/'/g, "\\'")}'
+          )">
+            ${answer}
+          </button>
+        `).join("")}
+      </div>
+
+      <div id="quizResult"></div>
+    `;
 
   }catch(error){
 
     quizContainer.innerHTML =
       "Errore quiz.";
+  }
+}
+
+function checkQuizAnswer(answer, correct, explanation){
+
+  const result =
+    document.getElementById("quizResult");
+
+  if(answer === correct){
+
+    result.innerHTML = `
+      <div class="quiz-correct">
+        ✅ Risposta corretta!
+      </div>
+    `;
+
+    addXP(20);
+
+  }else{
+
+    result.innerHTML = `
+      <div class="quiz-wrong">
+        ❌ Risposta errata.<br><br>
+        <strong>Risposta corretta:</strong> ${correct}<br>
+        <strong>Spiegazione:</strong> ${explanation}
+      </div>
+    `;
   }
 }
 

@@ -441,3 +441,7 @@ if("serviceWorker" in navigator){
       .register("service-worker.js");
   });
 }
+
+window.speechSynthesis.onvoiceschanged = () => {
+  speechSynthesis.getVoices();
+};
